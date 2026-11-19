@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Something for you</title>
+<meta name="description" content="I made you a little something. Open it.">
+<meta property="og:title" content="I made you something 👀">
+<meta property="og:description" content="Tap to open. No peeking.">
+<meta name="theme-color" content="#140b2e">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎁</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #140b2e;
+    --card: rgba(255, 255, 255, 0.08);
+    --card-border: rgba(255, 255, 255, 0.16);
+    --text: #ffffff;
+    --muted: rgba(255, 255, 255, 0.72);
+    --pink: #ff4d8d;
+    --violet: #7c5cff;
+    --cyan: #2de2e6;
+    --gold: #ffd166;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Fredoka', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    min-height: 100dvh;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+  }
+
+  /* floating background glow */
+  .glow { position: fixed; width: 90vmax; height: 90vmax; border-radius: 50%; pointer-events: none; z-index: 0;
+          animation: drift 16s ease-in-out infinite alternate; }
+  .glow.a { background: radial-gradient(circle, rgba(255, 77, 141, .45), transparent 62%); top: -45vmax; left: -40vmax; }
+  .glow.b { background: radial-gradient(circle, rgba(124, 92, 255, .5), transparent 62%); bottom: -45vmax; right: -40vmax; animation-delay: -8s; }
+  .glow.c { background: radial-gradient(circle, rgba(45, 226, 230, .18), transparent 60%); top: 30%; left: 30%; width: 60vmax; height: 60vmax; animation-duration: 22s; }
+  @keyframes drift { to { transform: translate(8vmax, 6vmax) scale(1.1); } }
+
+  .card {
+    position: relative; z-index: 1;
+    width: 100%; max-width: 420px; min-height: 480px;
+    padding: 40px 24px 28px;
+    border-radius: 30px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .12);
+    text-align: center;
+    display: flex; flex-direction: column;
+  }
+  .dots { position: absolute; top: 18px; left: 0; right: 0; display: flex; justify-content: center; gap: 6px; transition: opacity .3s; }
+  .dots i { width: 6px; height: 6px; border-radius: 99px; background: rgba(255, 255, 255, .25); transition: all .35s; }
+  .dots i.on { width: 20px; background: linear-gradient(90deg, var(--pink), var(--violet)); }
+
+  .content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
+  .content.enter { animation: enter .45s cubic-bezier(.2, .9, .3, 1.2) both; }
+  .content.leave { animation: leave .22s ease-in both; }
+  @keyframes enter { from { opacity: 0; transform: translateY(24px) scale(.96); } }
+  @keyframes leave { to { opacity: 0; transform: translateY(-16px) scale(.97); } }
+
+  .emoji { font-size: 76px; line-height: 1; animation: bob 2.4s ease-in-out infinite; filter: drop-shadow(0 10px 20px rgba(0, 0, 0, .35)); }
+  @keyframes bob { 50% { transform: translateY(-8px) rotate(-4deg); } }
+  h1 { font-size: clamp(27px, 7.4vw, 34px); font-weight: 700; line-height: 1.15; letter-spacing: -.01em; text-wrap: balance; }
+  p { color: var(--muted); font-size: 18px; line-height: 1.4; text-wrap: balance; }
+
+  .actions { display: flex; flex-direction: column; gap: 12px; width: 100%; margin-top: 18px; position: relative; }
+  .btn {
+    appearance: none; border: 0; font: inherit; font-weight: 600; font-size: 20px;
+    padding: 18px 22px; border-radius: 18px; color: #fff; cursor: pointer;
+    touch-action: manipulation; user-select: none; -webkit-user-select: none;
+    transition: transform .15s ease, translate .35s cubic-bezier(.3, 1.6, .5, 1), scale .3s cubic-bezier(.3, 1.6, .5, 1), opacity .3s;
+  }
+  .btn:active { transform: scale(.95); }
+  .btn:focus-visible { outline: 3px solid var(--cyan); outline-offset: 3px; }
+  .btn.primary { position: relative; z-index: 2; background: linear-gradient(135deg, var(--pink), var(--violet)); box-shadow: 0 12px 30px rgba(255, 77, 141, .35); }
+  .btn.ghost { position: relative; z-index: 1; background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .2); }
+  .btn.gone { opacity: 0; pointer-events: none; }
+
+  .hold { position: relative; overflow: hidden; background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .22);
+          -webkit-touch-callout: none; }
+  .hold .fill { position: absolute; inset: 0; background: linear-gradient(90deg, var(--pink), var(--violet)); transform-origin: left; transform: scaleX(var(--p, 0)); }
+  .hold span { position: relative; }
+  .hold.holding { animation: shake .12s linear infinite; }
+  @keyframes shake { 25% { translate: -1.5px 0; } 75% { translate: 1.5px 0; } }
+
+  .bar { width: 100%; height: 14px; border-radius: 99px; background: rgba(255, 255, 255, .12); overflow: hidden; margin-top: 10px; }
+  .bar i { display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, var(--cyan), var(--violet), var(--pink)); transition: width .6s cubic-bezier(.4, 0, .2, 1); }
+  .status { min-height: 1.4em; font-size: 17px; }
+  .spin { font-size: 64px; line-height: 1; animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .reveal-emoji { font-size: 96px; line-height: 1; animation: wiggle 1.2s ease-in-out infinite; }
+  @keyframes wiggle { 0%, 100% { transform: rotate(-8deg) scale(1); } 50% { transform: rotate(8deg) scale(1.08); } }
+  .reveal h1 { font-size: clamp(32px, 9vw, 42px); }
+  .grad { background: linear-gradient(90deg, var(--cyan), var(--pink)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .replay { margin-top: 22px; background: none; border: 0; color: var(--muted); font: inherit; font-size: 15px; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; padding: 8px; }
+
+  #confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+  }
+</style>
+</head>
+<body>
+  <div class="glow a"></div><div class="glow b"></div><div class="glow c"></div>
+
+  <main class="card" id="card">
+    <div class="dots" id="dots" aria-hidden="true"></div>
+    <div class="content" id="content" aria-live="polite">
+      <noscript><h1>Turn on JavaScript to open this 🎁</h1></noscript>
+    </div>
+  </main>
+
+  <canvas id="confetti" aria-hidden="true"></canvas>
+
+<script>
+  // ✏️ Edit these to change the final message
+  const REVEAL = {
+    emoji: '📱',
+    titleBefore: 'Go check what I sent you on ',
+    titleHighlight: 'TikTok',
+    text: "Go. Now. I'm waiting 👀",
+  };
+
+  const content = document.getElementById('content');
+  const dotsEl = document.getElementById('dots');
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const buzz = (p) => { try { navigator.vibrate && navigator.vibrate(p); } catch (_) {} };
+
+  // tiny element helper
+  function h(tag, props = {}, ...kids) {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(props)) {
+      if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+      else if (k === 'class') el.className = v;
+      else el.setAttribute(k, v);
+    }
+    for (const kid of kids.flat()) if (kid != null) el.append(kid);
+    return el;
+  }
+
+  const header = (emoji, title, text) => [
+    h('div', { class: 'emoji', 'aria-hidden': 'true' }, emoji),
+    h('h1', {}, title),
+    text ? h('p', {}, text) : null,
+  ];
+
+  // ---------- steps ----------
+  const steps = [
+    () => [
+      ...header('🎁', 'Hey you.', 'I made you a little something.'),
+      h('div', { class: 'actions' }, h('button', { class: 'btn primary', onclick: next }, 'Open it')),
+    ],
+    () => yesNo('🤔', 'Are you sure you want to continue?', "There's no going back after this.", 'Yes', 'No'),
+    () => yesNo('😳', 'Like… really sure?', 'Think about it. Really think.', "I'm sure", 'Wait, no'),
+    () => holdStep(),
+    () => loadingStep(),
+    () => revealStep(),
+  ];
+
+  function yesNo(emoji, title, text, yesLabel, noLabel) {
+    const taunts = [noLabel, 'Nope', 'Try the other one', 'Not an option', 'lol no', 'Fine, bye 👋'];
+    let tries = 0;
+    const yes = h('button', { class: 'btn primary', onclick: next }, yesLabel);
+    const no = h('button', { class: 'btn ghost' }, noLabel);
+
+    const dodge = () => {
+      tries++;
+      buzz(15);
+      if (tries >= taunts.length) { no.classList.add('gone'); yes.style.scale = '1.12'; return; }
+      no.textContent = taunts[tries];
+      const x = Math.round((Math.random() * 2 - 1) * 90);
+      const y = Math.round(10 + Math.random() * 90);
+      no.style.translate = `${x}px ${y}px`;
+      no.style.rotate = `${Math.round((Math.random() * 2 - 1) * 12)}deg`;
+      yes.style.scale = String(1 + tries * 0.06);
+    };
+    no.addEventListener('click', dodge);
+    // on desktop, it runs away before you can even click it
+    no.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') dodge(); });
+
+    return [...header(emoji, title, text), h('div', { class: 'actions' }, yes, no)];
+  }
+
+  function holdStep() {
+    const label = h('span', {}, 'Press & hold');
+    const btn = h('button', { class: 'btn hold' }, h('div', { class: 'fill' }), label);
+    let p = 0, holding = false, raf = null, last = 0, done = false;
+    const DURATION = 1.6; // seconds to fill
+
+    const tick = (t) => {
+      const dt = last ? (t - last) / 1000 : 0;
+      last = t;
+      p = holding ? Math.min(1, p + dt / DURATION) : Math.max(0, p - dt * 2.5);
+      btn.style.setProperty('--p', p);
+      if (holding) label.textContent = p > 0.65 ? 'Almost…' : 'Keep holding…';
+      if (p >= 1 && !done) { done = true; btn.classList.remove('holding'); buzz([20, 40, 20]); label.textContent = 'Confirmed ✓'; setTimeout(next, 350); return; }
+      if (holding || p > 0) raf = requestAnimationFrame(tick); else { raf = null; last = 0; }
+    };
+    const start = (e) => {
+      if (done) return;
+      e.preventDefault();
+      holding = true; btn.classList.add('holding'); buzz(10);
+      if (!raf) { last = 0; raf = requestAnimationFrame(tick); }
+    };
+    const stop = () => {
+      if (!holding || done) return;
+      holding = false; btn.classList.remove('holding');
+      if (p < 1) label.textContent = "Don't let go! Try again";
+    };
+    btn.addEventListener('pointerdown', (e) => { btn.setPointerCapture?.(e.pointerId); start(e); });
+    btn.addEventListener('pointerup', stop);
+    btn.addEventListener('pointercancel', stop);
+    btn.addEventListener('lostpointercapture', stop);
+    btn.addEventListener('contextmenu', (e) => e.preventDefault());
+    btn.addEventListener('keydown', (e) => { if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) start(e); });
+    btn.addEventListener('keyup', (e) => { if (e.key === ' ' || e.key === 'Enter') stop(); });
+
+    return [
+      ...header('⚠️', 'Final warning', 'Press and hold to confirm you are emotionally prepared.'),
+      h('div', { class: 'actions' }, btn),
+    ];
+  }
+
+  function loadingStep() {
+    const fill = h('i');
+    const status = h('p', { class: 'status' }, 'Checking vibes…');
+    const plan = [
+      [0, 14, 'Checking vibes…'],
+      [650, 37, 'Asking for permission…'],
+      [1300, 41, 'Bribing the servers…'],
+      [2000, 78, 'Hiding the evidence…'],
+      [2700, 99, 'Okay okay okay…'],
+      [3300, 100, 'Done!'],
+    ];
+    plan.forEach(([t, pct, msg]) => setTimeout(() => { fill.style.width = pct + '%'; status.textContent = msg; }, t + 60));
+    setTimeout(next, 3800);
+    return [
+      h('div', { class: 'spin', 'aria-hidden': 'true' }, '🌀'),
+      h('h1', {}, 'Unlocking…'),
+      h('div', { class: 'bar', role: 'progressbar', 'aria-label': 'Loading' }, fill),
+      status,
+    ];
+  }
+
+  function revealStep() {
+    buzz([30, 60, 30, 60, 80]);
+    confetti();
+    setTimeout(confetti, 900);
+    content.classList.add('reveal');
+    return [
+      h('div', { class: 'reveal-emoji', 'aria-hidden': 'true' }, REVEAL.emoji),
+      h('h1', {}, REVEAL.titleBefore, h('span', { class: 'grad' }, REVEAL.titleHighlight)),
+      h('p', {}, REVEAL.text),
+      h('button', { class: 'replay', onclick: () => go(0) }, '↺ do it again'),
+    ];
+  }
+
+  // ---------- navigation ----------
+  let index = 0;
+  const DOT_STEPS = steps.length - 1; // no dot for the reveal
+  dotsEl.append(...Array.from({ length: DOT_STEPS }, () => h('i')));
+
+  function render() {
+    content.classList.remove('reveal');
+    content.replaceChildren(...steps[index]());
+    content.classList.remove('leave');
+    void content.offsetWidth; // restart animation
+    content.classList.add('enter');
+    [...dotsEl.children].forEach((d, i) => d.classList.toggle('on', i === index));
+    dotsEl.style.opacity = index >= DOT_STEPS ? '0' : '1';
+  }
+
+  function go(i) {
+    buzz(10);
+    content.classList.remove('enter');
+    content.classList.add('leave');
+    setTimeout(() => { index = i; render(); }, reduceMotion ? 0 : 220);
+  }
+  function next() { if (index < steps.length - 1) go(index + 1); }
+
+  // ---------- confetti ----------
+  function confetti() {
+    if (reduceMotion) return;
+    const c = document.getElementById('confetti');
+    const ctx = c.getContext('2d');
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const W = innerWidth, H = innerHeight;
+    c.width = W * dpr; c.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const colors = ['#ff4d8d', '#7c5cff', '#2de2e6', '#ffd166', '#ffffff'];
+    const parts = Array.from({ length: 170 }, () => ({
+      x: W / 2 + (Math.random() - 0.5) * 60,
+      y: H * 0.42,
+      vx: (Math.random() - 0.5) * 16,
+      vy: -Math.random() * 15 - 5,
+      w: 6 + Math.random() * 6,
+      hgt: 8 + Math.random() * 8,
+      r: Math.random() * Math.PI,
+      vr: (Math.random() - 0.5) * 0.35,
+      wob: Math.random() * 10,
+      color: colors[(Math.random() * colors.length) | 0],
+    }));
+    const frame = () => {
+      ctx.clearRect(0, 0, W, H);
+      let alive = 0;
+      for (const p of parts) {
+        p.vy += 0.32; p.vx *= 0.985; p.x += p.vx; p.y += p.vy; p.r += p.vr; p.wob += 0.15;
+        if (p.y < H + 30) alive++;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.r);
+        ctx.scale(1, Math.cos(p.wob));
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w / 2, -p.hgt / 2, p.w, p.hgt);
+        ctx.restore();
+      }
+      if (alive) requestAnimationFrame(frame); else ctx.clearRect(0, 0, W, H);
+    };
+    requestAnimationFrame(frame);
+  }
+
+  render();
+</script>
+</body>
+</html>
